@@ -153,7 +153,7 @@ const JobPage = ({ deleteJob, applyjob }) => {
                   onClick={() => setApplyForJob((prevState) => !prevState)}
                   className="text-indigo-500 mb-5 hover:text-indigo-600"
                 >
-                  Apply!!!
+                  Apply.
                 </button>
                 <div className={applyForJob ? "" : "hidden"}>
                   <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
