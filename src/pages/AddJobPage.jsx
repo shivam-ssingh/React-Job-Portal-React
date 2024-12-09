@@ -14,7 +14,7 @@ const AddJobPage = ({ addJobSubmit }) => {
   const [contactPhone, setContactPhone] = useState("");
   const navigate = useNavigate();
 
-  const submitForm = (e) => {
+  const submitForm = async (e) => {
     e.preventDefault();
 
     const newJob = {
@@ -31,11 +31,13 @@ const AddJobPage = ({ addJobSubmit }) => {
       },
     };
 
-    addJobSubmit(newJob);
-
-    toast.success("Job Added Successfully");
-
-    return navigate("/jobs");
+    try {
+      await addJobSubmit(newJob);
+      toast.success("Job Added Successfully");
+      return navigate("/jobs");
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   return (

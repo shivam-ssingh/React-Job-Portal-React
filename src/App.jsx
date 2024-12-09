@@ -3,6 +3,7 @@ import {
   createBrowserRouter,
   createRoutesFromElements,
   RouterProvider,
+  useLocation,
 } from "react-router-dom";
 import React, { useState } from "react";
 import HomePage from "./pages/HomePage";
@@ -12,19 +13,33 @@ import NotFoundPage from "./pages/NotFoundPage";
 import JobPage, { jobLoader } from "./pages/JobPage";
 import AddJobPage from "./pages/AddJobPage";
 import EditJobPage from "./pages/EditJobPage";
-import LoginPage from "./pages/LoginPage";
+import PrivateRoute from "./components/PrivateRoute";
+import LoginRegisterPage from "./pages/LoginRegisterPage";
+import { UserProvider } from "./components/UserContext";
 const App = () => {
   const [user, setUser] = useState(null);
   // Add New Job
   const addJob = async (newJob) => {
-    const res = await fetch("/api/jobs", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newJob),
-    });
-    return;
+    try {
+      const storedUserData = JSON.parse(localStorage.getItem("user"));
+      console.log("stored toke data is ..........", storedUserData["token"]);
+      const res = await fetch("http://localhost:3000/api/v1/jobs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${storedUserData["token"]}`,
+        },
+        body: JSON.stringify(newJob),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Something went wrong");
+      }
+      return;
+    } catch (error) {
+      console.error("Error:", error.message);
+      throw error;
+    }
   };
 
   // Delete Job
@@ -53,29 +68,99 @@ const App = () => {
     setUser(userData);
   };
 
+  const applyJob = async (jobApplicant) => {
+    try {
+      const storedUserData = JSON.parse(localStorage.getItem("user"));
+      console.log("stored toke data is ..........", storedUserData["token"]);
+      const res = await fetch("http://localhost:3000/api/v1/jobs/apply", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${storedUserData["token"]}`,
+        },
+        body: JSON.stringify(jobApplicant),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Something went wrong");
+      }
+      return;
+    } catch (error) {
+      console.error("Error:", error.message);
+      throw error;
+    }
+  };
   const router = createBrowserRouter(
     createRoutesFromElements(
-      <Route path="/" element={<MainLayout />}>
-        <Route index element={<HomePage />} />
-        <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
-        <Route path="/add-job" element={<AddJobPage addJobSubmit={addJob} />} />
+      <Route path="/" element={<MainLayout user={user} setUser={setUser} />}>
+        <Route path="/login" element={<LoginRegisterPage />} />
+        <Route path="/register" element={<LoginRegisterPage />} />
+
+        <Route
+          index
+          element={
+            <PrivateRoute>
+              <HomePage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/add-job"
+          element={
+            <PrivateRoute>
+              {" "}
+              <AddJobPage addJobSubmit={addJob} />{" "}
+            </PrivateRoute>
+          }
+        />
         <Route
           path="/edit-job/:id"
-          element={<EditJobPage updateJobSubmit={updateJob} />}
+          element={
+            <PrivateRoute>
+              {" "}
+              <EditJobPage updateJobSubmit={updateJob} />{" "}
+            </PrivateRoute>
+          }
           loader={jobLoader}
+        />
+        <Route
+          path="/jobs/:id/:userid"
+          element={
+            <PrivateRoute>
+              {" "}
+              <JobPage deleteJob={deleteJob} applyjob={applyJob} />{" "}
+            </PrivateRoute>
+          }
+          loader={jobLoader}
+        />
+        <Route
+          path="/jobs"
+          element={
+            <PrivateRoute>
+              {" "}
+              <JobsPage />{" "}
+            </PrivateRoute>
+          }
         />
         <Route
           path="/jobs/:id"
-          element={<JobPage deleteJob={deleteJob} />}
+          element={
+            <PrivateRoute>
+              {" "}
+              <JobPage />
+            </PrivateRoute>
+          }
           loader={jobLoader}
         />
-        <Route path="/jobs" element={<JobsPage />} />
-        <Route path="/jobs/:id" element={<JobPage />} loader={jobLoader} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     )
   );
-  return <RouterProvider router={router} />;
+  return (
+    <UserProvider>
+      <RouterProvider router={router} />
+    </UserProvider>
+  );
 };
 
 export default App;

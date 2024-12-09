@@ -1,7 +1,19 @@
-import React from "react";
+import React, { useEffect, useState, useContext } from "react";
 import logo from "../assets/images/logo.png";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { UserContext } from "./UserContext";
 const Navbar = () => {
+  const { user, logout } = useContext(UserContext);
+  const isEmployer =
+    user && user["profile"]["userRole"] === "Employer" ? true : false;
+  console.log("Logged In User is.......", isEmployer);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   const linkClass = ({ isActive }) =>
     isActive
       ? "text-white bg-black hover:bg-gray-900 hover:text-white rounded-md px-3 py-2"
@@ -18,7 +30,7 @@ const Navbar = () => {
                 React Jobs
               </span>
             </NavLink>
-            <div className="md:ml-auto">
+            <div className={user ? "md:ml-auto" : "invisible"}>
               <div className="flex space-x-2">
                 <NavLink to="/" className={linkClass}>
                   Home
@@ -26,9 +38,23 @@ const Navbar = () => {
                 <NavLink to="/jobs" className={linkClass}>
                   Jobs
                 </NavLink>{" "}
-                <NavLink to="/add-job" className={linkClass}>
+                <NavLink
+                  to="/add-job"
+                  className={isEmployer ? linkClass : "hidden"}
+                >
                   Add Job
                 </NavLink>
+                <button onClick={handleLogout}>Logout</button>
+              </div>
+            </div>
+            <div className={user ? "invisible" : "md:ml-auto"}>
+              <div className="flex space-x-2">
+                <NavLink to="/login" className={linkClass}>
+                  Login
+                </NavLink>
+                <NavLink to="/register" className={linkClass}>
+                  Register
+                </NavLink>{" "}
               </div>
             </div>
           </div>

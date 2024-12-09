@@ -1,14 +1,30 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useContext, useState } from "react";
 import { FaArrowLeft, FaMapMarker } from "react-icons/fa";
-import Spinner from "../components/Spinner";
 import { useParams, useLoaderData, useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import { UserContext } from "../components/UserContext";
 
-const JobPage = ({ deleteJob }) => {
-  const { id } = useParams();
-  const job = useLoaderData();
+const JobPage = ({ deleteJob, applyjob }) => {
+  const { user, logout } = useContext(UserContext);
+  const [applyForJob, setApplyForJob] = useState(false);
+  const [resumeLink, setResumeLink] = useState("");
   const navigate = useNavigate();
+
+  const { id } = useParams();
+
+  const loaderData = useLoaderData();
+  if (loaderData == "unauthorized") {
+    logout();
+    navigate("/login");
+  }
+  const job = loaderData.job || {};
+  const isUserApplied = loaderData.userPresent || false;
+  console.log("user present.........", isUserApplied);
+
+  console.log("job page data.....", job);
+  const isEmployer =
+    user && user["profile"]["userRole"] === "Employer" ? true : false;
+  console.log("isEmployer", isEmployer);
 
   const onDeleteClick = (jobId) => {
     const confirm = window.confirm(
@@ -24,6 +40,20 @@ const JobPage = ({ deleteJob }) => {
     navigate("/jobs");
   };
 
+  const onApplyJobClick = async (jobId) => {
+    const applicant = {
+      jobId,
+      resumeLink,
+    };
+
+    try {
+      await applyjob(applicant);
+      toast.success("Job Applied Successfully");
+      return navigate("/jobs");
+    } catch (error) {
+      alert(error.message);
+    }
+  };
   return (
     <>
       <section>
@@ -89,22 +119,85 @@ const JobPage = ({ deleteJob }) => {
                   {job.company.contactPhone}
                 </p>
               </div>
-
-              <div className="bg-white p-6 rounded-lg shadow-md mt-6">
+              {/* hide the below from candidates */}
+              <div
+                className={
+                  isEmployer
+                    ? "bg-white p-6 rounded-lg shadow-md mt-6"
+                    : "hidden"
+                }
+              >
                 <h3 className="text-xl font-bold mb-6">Manage Job</h3>
                 <Link
-                  to={`/edit-job/${job.id}`}
+                  to={`/edit-job/${job._id}`}
                   className="bg-indigo-500 hover:bg-indigo-600 text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
                 >
                   Edit Job
                 </Link>
                 <button
-                  onClick={() => onDeleteClick(job.id)}
+                  onClick={() => onDeleteClick(job._id)}
                   className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
                 >
                   Delete Job
                 </button>
               </div>
+              <div
+                className={
+                  !isEmployer && !isUserApplied
+                    ? "bg-white p-6 rounded-lg shadow-md mt-6"
+                    : "hidden"
+                }
+              >
+                <h3 className="text-xl font-bold mb-6">Apply Job</h3>
+                <button
+                  onClick={() => setApplyForJob((prevState) => !prevState)}
+                  className="text-indigo-500 mb-5 hover:text-indigo-600"
+                >
+                  Apply!!!
+                </button>
+                <div className={applyForJob ? "" : "hidden"}>
+                  <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    Resume Link
+                  </label>
+                  <input
+                    value={resumeLink}
+                    onChange={(e) => setResumeLink(e.target.value)}
+                    type="text"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    required
+                  />
+                  <button
+                    onClick={() => onApplyJobClick(job._id)}
+                    type="submit"
+                    className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                  >
+                    Submit
+                  </button>
+                </div>
+                {/* <Link
+                  to={`/apply-job/${user.profile.id}/${job.id}`}
+                  className="bg-indigo-500 hover:bg-indigo-600 text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
+                >
+                  Apply For Job
+                </Link> */}
+              </div>
+              <h1
+                className={
+                  !isEmployer && isUserApplied
+                    ? "bg-white p-6 rounded-lg shadow-md mt-6"
+                    : "hidden"
+                }
+              >
+                You've already applied
+              </h1>
+              {/* <div
+                className={
+                  isEmployer && isUserApplied
+                    ? "bg-white p-6 rounded-lg shadow-md mt-6"
+                    : "hidden"
+                }
+              >
+              </div> */}
             </aside>
           </div>
         </div>
@@ -137,7 +230,17 @@ const JobPage = ({ deleteJob }) => {
 };
 
 const jobLoader = async ({ params }) => {
-  const res = await fetch(`/api/jobs/${params.id}`);
+  const storedUserData = JSON.parse(localStorage.getItem("user"));
+  const res = await fetch(`http://localhost:3000/api/v1/jobs/${params.id}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${storedUserData["token"]}`,
+    },
+  });
+  if (!res.ok && res.status == 401) {
+    return "unauthorized";
+  }
   const data = await res.json();
   return data;
 };

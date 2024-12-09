@@ -1,20 +1,43 @@
-import { React, useState, useEffect } from "react";
+import { React, useState, useEffect, useContext } from "react";
 import JobListing from "./JobListing";
 import Spinner from "./Spinner";
+import { UserContext } from "./UserContext";
+
 const JobListings = ({ isHome = false }) => {
+  const { user, logout } = useContext(UserContext);
+
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchJobs = async () => {
-      const apiUrl = isHome ? "/api/jobs?_limit=3" : "/api/jobs";
+      const storedUserData = JSON.parse(localStorage.getItem("user"));
+      // const apiUrl = isHome ? "/api/jobs?_limit=3" : "/api/jobs";
+      const apiUrl = isHome
+        ? "http://localhost:3000/api/v1/jobs?limit=3"
+        : "http://localhost:3000/api/v1/jobs";
       try {
         console.log("calling api");
-        const res = await fetch(apiUrl);
+        const res = await fetch(apiUrl, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${storedUserData["token"]}`,
+          },
+        });
+        if (!res.ok) {
+          if (res.status == 401) {
+            logout();
+            navigate("/login");
+          }
+          const error = await res.json();
+          throw new Error(error.message || "Something went wrong");
+        }
         const data = await res.json();
         console.log(data);
-        setJobs(data);
+        setJobs(data.jobs);
       } catch (error) {
+        setJobs([]);
         console.log("Error getting data", error);
       } finally {
         setLoading(false);
@@ -36,7 +59,7 @@ const JobListings = ({ isHome = false }) => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {jobs.map((job) => (
-              <JobListing key={job.id} job={job} />
+              <JobListing key={job._id} job={job} />
             ))}
           </div>
         )}
