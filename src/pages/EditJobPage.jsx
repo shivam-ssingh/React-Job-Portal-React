@@ -3,7 +3,9 @@ import { useParams, useLoaderData, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const EditJobPage = ({ updateJobSubmit }) => {
-  const job = useLoaderData();
+  const mainData = useLoaderData();
+  const job = mainData.job;
+  console.log("EDT JOB PAGE.....", job);
   const [title, setTitle] = useState(job.title);
   const [type, setType] = useState(job.type);
   const [location, setLocation] = useState(job.location);

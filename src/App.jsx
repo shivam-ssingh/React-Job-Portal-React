@@ -44,21 +44,35 @@ const App = () => {
 
   // Delete Job
   const deleteJob = async (id) => {
-    const res = await fetch(`/api/jobs/${id}`, {
+    const storedUserData = JSON.parse(localStorage.getItem("user"));
+    console.log("DELETE CALL......", id);
+    const res = await fetch(`http://localhost:3000/api/v1/jobs/${id}`, {
       method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${storedUserData["token"]}`,
+      },
     });
+    console.log("DELETE CALL......", res);
+    // const res = await fetch(`/api/jobs/${id}`, {
+    //   method: "DELETE",
+    // });
     return;
   };
 
   // Update Job
   const updateJob = async (job) => {
-    const res = await fetch(`/api/jobs/${job.id}`, {
-      method: "PUT",
+    const storedUserData = JSON.parse(localStorage.getItem("user"));
+    const res = await fetch(`http://localhost:3000/api/v1/jobs/${job.id}`, {
+      method: "PATCH",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${storedUserData["token"]}`,
       },
       body: JSON.stringify(job),
     });
+    console.log("Update job request....", JSON.stringify(job));
+    console.log("Update job....", res);
     return;
   };
 

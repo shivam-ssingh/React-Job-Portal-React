@@ -26,14 +26,14 @@ const JobPage = ({ deleteJob, applyjob }) => {
     user && user["profile"]["userRole"] === "Employer" ? true : false;
   console.log("isEmployer", isEmployer);
 
-  const onDeleteClick = (jobId) => {
+  const onDeleteClick = async (jobId) => {
     const confirm = window.confirm(
       "Are you sure you want to delete this listing?"
     );
 
     if (!confirm) return;
 
-    deleteJob(jobId);
+    await deleteJob(jobId);
 
     toast.success("Job deleted successfully");
 

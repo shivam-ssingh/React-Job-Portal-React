@@ -78,7 +78,7 @@ const AddJobPage = ({ addJobSubmit }) => {
                 id="title"
                 name="title"
                 className="border rounded w-full py-2 px-3 mb-2"
-                placeholder="eg. Retirement Job"
+                placeholder="eg. Well paying Job"
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
