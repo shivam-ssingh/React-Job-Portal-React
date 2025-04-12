@@ -23,14 +23,17 @@ const App = () => {
     try {
       const storedUserData = JSON.parse(localStorage.getItem("user"));
       console.log("stored toke data is ..........", storedUserData["token"]);
-      const res = await fetch("http://localhost:3000/api/v1/jobs", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${storedUserData["token"]}`,
-        },
-        body: JSON.stringify(newJob),
-      });
+      const res = await fetch(
+        "https://express-job-api.onrender.com/api/v1/jobs",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${storedUserData["token"]}`,
+          },
+          body: JSON.stringify(newJob),
+        }
+      );
       if (!res.ok) {
         const error = await res.json();
         throw new Error(error.message || "Something went wrong");
@@ -46,13 +49,16 @@ const App = () => {
   const deleteJob = async (id) => {
     const storedUserData = JSON.parse(localStorage.getItem("user"));
     console.log("DELETE CALL......", id);
-    const res = await fetch(`http://localhost:3000/api/v1/jobs/${id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${storedUserData["token"]}`,
-      },
-    });
+    const res = await fetch(
+      `https://express-job-api.onrender.com/api/v1/jobs/${id}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${storedUserData["token"]}`,
+        },
+      }
+    );
     console.log("DELETE CALL......", res);
     // const res = await fetch(`/api/jobs/${id}`, {
     //   method: "DELETE",
@@ -63,14 +69,17 @@ const App = () => {
   // Update Job
   const updateJob = async (job) => {
     const storedUserData = JSON.parse(localStorage.getItem("user"));
-    const res = await fetch(`http://localhost:3000/api/v1/jobs/${job.id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${storedUserData["token"]}`,
-      },
-      body: JSON.stringify(job),
-    });
+    const res = await fetch(
+      `https://express-job-api.onrender.com/api/v1/jobs/${job.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${storedUserData["token"]}`,
+        },
+        body: JSON.stringify(job),
+      }
+    );
     console.log("Update job request....", JSON.stringify(job));
     console.log("Update job....", res);
     return;
@@ -86,14 +95,17 @@ const App = () => {
     try {
       const storedUserData = JSON.parse(localStorage.getItem("user"));
       console.log("stored toke data is ..........", storedUserData["token"]);
-      const res = await fetch("http://localhost:3000/api/v1/jobs/apply", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${storedUserData["token"]}`,
-        },
-        body: JSON.stringify(jobApplicant),
-      });
+      const res = await fetch(
+        "https://express-job-api.onrender.com/api/v1/jobs/apply",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${storedUserData["token"]}`,
+          },
+          body: JSON.stringify(jobApplicant),
+        }
+      );
       if (!res.ok) {
         const error = await res.json();
         throw new Error(error.message || "Something went wrong");

@@ -231,13 +231,16 @@ const JobPage = ({ deleteJob, applyjob }) => {
 
 const jobLoader = async ({ params }) => {
   const storedUserData = JSON.parse(localStorage.getItem("user"));
-  const res = await fetch(`http://localhost:3000/api/v1/jobs/${params.id}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${storedUserData["token"]}`,
-    },
-  });
+  const res = await fetch(
+    `https://express-job-api.onrender.com/api/v1/jobs/${params.id}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${storedUserData["token"]}`,
+      },
+    }
+  );
   if (!res.ok && res.status == 401) {
     return "unauthorized";
   }

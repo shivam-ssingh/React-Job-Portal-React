@@ -13,11 +13,14 @@ const LoginRegisterPage = () => {
   const handleSubmit = async (formData) => {
     try {
       const endpoint = isLogin ? "/api/v1/user/login" : "/api/v1/user/register";
-      const response = await fetch(`http://localhost:3000${endpoint}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        `https://express-job-api.onrender.com${endpoint}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        }
+      );
 
       const data = await response.json();
       if (response.ok) {

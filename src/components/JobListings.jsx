@@ -14,8 +14,8 @@ const JobListings = ({ isHome = false }) => {
       const storedUserData = JSON.parse(localStorage.getItem("user"));
       // const apiUrl = isHome ? "/api/jobs?_limit=3" : "/api/jobs";
       const apiUrl = isHome
-        ? "http://localhost:3000/api/v1/jobs?limit=3"
-        : "http://localhost:3000/api/v1/jobs";
+        ? "https://express-job-api.onrender.com/api/v1/jobs?limit=3"
+        : "https://express-job-api.onrender.com/api/v1/jobs";
       try {
         console.log("calling api");
         const res = await fetch(apiUrl, {
