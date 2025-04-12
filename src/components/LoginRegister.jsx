@@ -12,7 +12,7 @@ const LoginRegisterComponent = ({ mode, onSubmit }) => {
     const formData = { email, password };
     if (!isLogin) {
       formData.name = name;
-      formData.role = role;
+      formData.userRole = role;
     }
     onSubmit(formData);
   };
